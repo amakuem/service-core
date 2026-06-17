@@ -1,16 +1,39 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional
 from decimal import Decimal
 from datetime import datetime
+import re
 
 class UserBase(BaseModel):
     first_name: Optional[str] = Field(None, max_length=50)
     last_name: Optional[str] = Field(None, max_length=100)
-    phone: Optional[str] = Field(None, max_length=15)
+    phone: Optional[str] = Field(None)
     email: EmailStr = Field(...)
 
 class UserCreate(UserBase):
     password: str = Field(..., min_length=8)
+    
+    @field_validator('phone')
+    @classmethod 
+    def validate_phone(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        
+        clean_phone = re.sub(r'[^\d+]', '', v)
+        if clean_phone.startswith('80') and len(clean_phone) == 11:
+            clean_phone = '+375' + clean_phone[2:]
+            
+        # 3. Если ввели "375...", но забыли поставить плюс в начале
+        if clean_phone.startswith('375') and len(clean_phone) == 12:
+            clean_phone = '+' + clean_phone
+
+        # 4. Проверяем финальный шаблон: строго +375, затем коды (25, 29, 33, 44, 17) и 7 цифр
+        if not re.match(r'^\+375(25|29|33|44|17)\d{7}$', clean_phone):
+            raise ValueError(
+                'Неверный формат номера. Используйте +375 (XX) XXX-XX-XX или 80 (XX) XXX-XX-XX'
+            )
+            
+        return clean_phone
 
 class UserResponse(UserBase):
     id: int 
@@ -35,6 +58,19 @@ class ServiceResponse(ServiceBase):
     class Config:
         from_attributes = True
 
+class OrderServiceCreate(BaseModel):
+    service_id: int = Field(...)
+    quantity: int = Field(1, ge=1)
+
+class OrderServiceResponse(BaseModel):
+    id: int
+    service_id: int
+    fixed_price: Decimal
+    quantity: int
+
+    class Config:
+        from_attributes = True
+
 class OrderBase(BaseModel):
     device_name: str = Field(..., max_length=255)
     serial_number: Optional[str] = Field(None, max_length=50)
@@ -53,6 +89,8 @@ class OrderResponse(OrderBase):
     status: str
     master_comment: str
     client_id: int
+    master_id: Optional[int] = None
+    services: list[OrderServiceResponse] = []
     created_at: datetime
     updated_at: datetime
 

@@ -42,6 +42,7 @@ class Order(Base):
     updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now())
 
     client_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    master_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
 class OrderService(Base):
     __tablename__ = "order_services"
