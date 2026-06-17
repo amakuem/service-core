@@ -49,3 +49,4 @@ ehthumbs.db
 *.nupkg
 *.snupkg
 .project
+*.env
