@@ -23,17 +23,21 @@ class UserCreate(UserBase):
         if clean_phone.startswith('80') and len(clean_phone) == 11:
             clean_phone = '+375' + clean_phone[2:]
             
-        # 3. Если ввели "375...", но забыли поставить плюс в начале
         if clean_phone.startswith('375') and len(clean_phone) == 12:
             clean_phone = '+' + clean_phone
 
-        # 4. Проверяем финальный шаблон: строго +375, затем коды (25, 29, 33, 44, 17) и 7 цифр
         if not re.match(r'^\+375(25|29|33|44|17)\d{7}$', clean_phone):
             raise ValueError(
                 'Неверный формат номера. Используйте +375 (XX) XXX-XX-XX или 80 (XX) XXX-XX-XX'
             )
             
         return clean_phone
+
+class UserUpdate(BaseModel):
+    first_name: Optional[str] = Field(None, max_length=50)
+    last_name: Optional[str] = Field(None, max_length=100)
+    phone: Optional[str] = Field(None)  
+    email: Optional[EmailStr] = Field(None)
 
 class UserResponse(UserBase):
     id: int 
@@ -51,6 +55,12 @@ class ServiceBase(BaseModel):
 
 class ServiceCreate(ServiceBase):
     pass
+
+class ServiceUpdate(BaseModel):
+    name: Optional[str] = Field(None, max_length=150)
+    description: Optional[str] = Field(None)
+    base_price : Optional[Decimal] = Field(None, ge=0)
+    is_active: Optional[bool] = Field(None)
 
 class ServiceResponse(ServiceBase):
     id: int
