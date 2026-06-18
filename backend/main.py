@@ -83,7 +83,7 @@ def update_user(user_id: int, user_in: schemas.UserUpdate, db: Session = Depends
 
 @app.get("/services", response_model=List[schemas.ServiceResponse])
 def get_all_services(db: Session = Depends(get_db)):
-    services = db.query(models.Service).all()
+    services = db.query(models.Service).filter(models.Service.is_active == True).all()
     return services
 
 @app.get("/service/{service_id}", response_model=schemas.ServiceResponse)
@@ -126,6 +126,20 @@ def update_service(service_id: int, service_in: schemas.ServiceUpdate, db: Sessi
     
     for key, value in update_data.items():
         setattr(db_service, key, value)
+
+    db.commit()
+    db.refresh(db_service)
+
+    return db_service
+
+@app.delete("/service/{service_id}", response_model=schemas.ServiceResponse)
+def delete_service(service_id: int, db: Session = Depends(get_db)):
+    db_service = db.query(models.Service).filter(models.Service.id == service_id).first()
+
+    if not db_service:
+        raise HTTPException(status_code=404, detail="Услуга не найдена")
+
+    db_service.is_active = False
 
     db.commit()
     db.refresh(db_service)
@@ -224,6 +238,8 @@ def update_order(order_id: int, order_in: schemas.OrderUpdate, db: Session = Dep
                     fixed_price=db_service.base_price
                 )
                 db.add(new_order_service)
+
+        db_order.updated_at = func.now()
             
     db.commit()
     db.refresh(db_order)
@@ -232,3 +248,36 @@ def update_order(order_id: int, order_in: schemas.OrderUpdate, db: Session = Dep
              .options(joinedload(models.Order.services))\
              .filter(models.Order.id == order_id)\
              .first()
+
+@app.delete("/order/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_order(order_id: int, db: Session = Depends(get_db)):
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+
+    if not db_order:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
+    
+    db.delete(db_order)
+    db.commit()
+
+    return None
+
+@app.delete("/order/{order_id}/services/{service_id}", response_model=schemas.OrderResponse)
+def delete_service_from_order(order_id: int, service_id: int, db: Session = Depends(get_db)):
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+
+    if not db_order:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
+    
+    order_service_entry = db.query(models.OrderService).filter(models.OrderService.order_id == order_id, models.OrderService.service_id == service_id).first()
+
+    if not order_service_entry:
+        raise HTTPException(status_code=404, detail="Указанная услуга не привязана к этому заказу")
+    
+    db_order.updated_at = func.now()
+
+    db.delete(order_service_entry)
+    db.commit()
+
+    db.refresh(db_order)
+
+    return db.query(models.Order).options(joinedload(models.Order.services)).filter(models.Order.id == order_id).first()

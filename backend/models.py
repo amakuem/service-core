@@ -45,7 +45,12 @@ class Order(Base):
     client_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     master_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
-    services = relationship("OrderService", back_populates="order")
+    services = relationship(
+        "OrderService", 
+        back_populates="order", 
+        cascade="all, delete-orphan", 
+        passive_deletes=True
+    )
 
 class OrderService(Base):
     __tablename__ = "order_services"
