@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, TIMESTAMP, Numeric, Boolean, TEXT, ForeignKey, JSON
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from database import Base
 
 class User(Base):
@@ -44,6 +45,8 @@ class Order(Base):
     client_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     master_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
+    services = relationship("OrderService", back_populates="order")
+
 class OrderService(Base):
     __tablename__ = "order_services"
 
@@ -53,6 +56,10 @@ class OrderService(Base):
     service_id = Column(Integer, ForeignKey("services.id", ondelete="CASCADE"), nullable=False)
 
     quantity = Column(Integer, default=1)
+
+    fixed_price = Column(Numeric(10, 2), nullable=False, default=0.00)
+
+    order = relationship("Order", back_populates="services")
 
 class UserActivityLog(Base):
     __tablename__ = "user_activity_logs"

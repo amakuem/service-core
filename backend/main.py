@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import text
 from database import get_db, engine
 from typing import List
@@ -132,3 +132,103 @@ def update_service(service_id: int, service_in: schemas.ServiceUpdate, db: Sessi
 
     return db_service
 
+@app.get("/orders", response_model=List[schemas.OrderResponse])
+def get_all_orders(db: Session = Depends(get_db)):
+    orders = db.query(models.Order).options(joinedload(models.Order.services)).all()
+    return orders
+
+@app.get("/order/{order_id}", response_model=schemas.OrderResponse)
+def get_order_by_id(order_id: int, db: Session = Depends(get_db)):
+    order = db.query(models.Order).options(joinedload(models.Order.services)).filter(models.Order.id == order_id).first()
+    return order
+
+@app.post("/orders", response_model=schemas.OrderResponse, status_code=status.HTTP_201_CREATED)
+def create_order(order_in: schemas.OrderCreate, db: Session = Depends(get_db)):
+    client = db.query(models.User).filter(models.User.id == order_in.client_id).first()
+
+    if not client:
+        raise HTTPException(status_code=404, detail="Указанный клиент не найден")
+    
+    new_order = models.Order(
+        device_name=order_in.device_name,
+        serial_number=order_in.serial_number,
+        issue_description=order_in.issue_description,
+        client_id=order_in.client_id,
+        status="new"
+    )
+
+    db.add(new_order)
+    db.flush()
+
+    for service_item in order_in.services:
+        db_service = db.query(models.Service).filter(models.Service.id == service_item.service_id).first()
+        if not db_service:
+            db.rollback()
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Услуга с ID {service_item.service_id} не найдена в прайс-листе"
+            )
+        new_order_service = models.OrderService(
+            order_id=new_order.id,
+            service_id=service_item.service_id,
+            quantity=service_item.quantity,
+            fixed_price=db_service.base_price
+        )
+
+        db.add(new_order_service)
+
+    db.commit()
+
+    db.refresh(new_order)
+
+    return db.query(models.Order)\
+             .options(joinedload(models.Order.services))\
+             .filter(models.Order.id == new_order.id)\
+             .first()
+
+@app.patch("/order/{order_id}", response_model=schemas.OrderResponse)
+def update_order(order_id: int, order_in: schemas.OrderUpdate, db: Session = Depends(get_db)):
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    
+    if not db_order:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
+    
+    update_data = order_in.model_dump(exclude_unset=True, exclude={"services"})
+
+    for key, value in update_data.items():
+        setattr(db_order, key, value)
+
+    if order_in.services is not None:
+        for service_item in order_in.services:
+            db_service = db.query(models.Service).filter(models.Service.id == service_item.service_id).first()
+
+            if not db_service:
+                db.rollback()
+                raise HTTPException(
+                    status_code=404, 
+                    detail=f"Услуга с ID {service_item.service_id} не найдена в прайс-листе"
+                )
+            
+            existing_order_service = db.query(models.OrderService).filter(
+                models.OrderService.order_id == order_id,
+                models.OrderService.service_id == service_item.service_id
+            ).first()
+
+            if existing_order_service:
+                existing_order_service.quantity += service_item.quantity
+            else:
+                new_order_service = models.OrderService(
+                    order_id=db_order.id,
+                    service_id=service_item.service_id,
+                    quantity=service_item.quantity,
+                    fixed_price=db_service.base_price
+                )
+                db.add(new_order_service)
+            
+    db.commit()
+    db.refresh(db_order)
+
+    return db.query(models.Order)\
+             .options(joinedload(models.Order.services))\
+             .filter(models.Order.id == order_id)\
+             .first()
