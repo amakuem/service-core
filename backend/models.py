@@ -71,7 +71,7 @@ class UserActivityLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     action_type = Column(String(50), nullable=False)
-    action_name = Column(String(50), nullable=False)
+    entity_name = Column(String(50), nullable=False)
     entity_id = Column(Integer)
 
     old_data = Column(JSON, nullable=True)

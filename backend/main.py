@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import text
 from database import get_db, engine
@@ -7,6 +8,21 @@ import models
 import schemas
 
 app = FastAPI(title="Сервисный Центр API")
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
@@ -281,3 +297,9 @@ def delete_service_from_order(order_id: int, service_id: int, db: Session = Depe
     db.refresh(db_order)
 
     return db.query(models.Order).options(joinedload(models.Order.services)).filter(models.Order.id == order_id).first()
+
+@app.get("/users-logs", response_model=List[schemas.UserActivityLogResponse])
+def users_logs(db: Session = Depends(get_db)):
+    users_logs = db.query(models.UserActivityLog).all()
+    return users_logs
+
