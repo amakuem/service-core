@@ -67,7 +67,7 @@ def update_user(user_id: int, user_in: schemas.UserUpdate, db: Session = Depends
     
     if current_user.role != "admin" and current_user.id != user_id:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDZEN,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Вы можете изменять только свои собственные данные."
         )
     
