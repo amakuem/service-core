@@ -1,13 +1,17 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import text
+from sqlalchemy import text, func
 from database import get_db, engine
 from typing import List
 import models
 import schemas
+import auth
+from auth_utils import require_admin, get_current_user, require_staff
 
 app = FastAPI(title="Сервисный Центр API")
+
+app.include_router(auth.router)
 
 origins = [
     "http://localhost:3000",
@@ -39,14 +43,17 @@ def test_database_connectiono(db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка подключения к БД: {str(e)}")
 
-@app.get("/users", response_model=List[schemas.UserResponse])
-def get_all_users(db: Session = Depends(get_db)):
+@app.get("/users", response_model=List[schemas.UserResponse] )
+def get_all_users(db: Session = Depends(get_db), current_admin = Depends(require_admin)):
     users = db.query(models.User).all()
 
     return users
 
 @app.get("/user/{user_id}", response_model=schemas.UserResponse)
-def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
+def get_user_by_id(user_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    if current_user.role not in ["admin", "master"] and current_user.id != user_id:
+        raise HTTPException(status_code=403, detail="Доступ к чужому профилю запрещен")
+
     user = db.query(models.User).filter(models.User.id == user_id).first()
 
     if not user:
@@ -54,30 +61,16 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
 
     return user
 
-@app.post("/users", response_model=schemas.UserResponse, status_code=status.HTTP_201_CREATED)
-def create_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(models.User).filter(models.User.email == user_in.email).first()
-
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Этот email уже зарегистрирован")
-    
-    new_user = models.User(
-        first_name=user_in.first_name,
-        last_name=user_in.last_name,
-        phone=user_in.phone,
-        email=user_in.email,
-        password=user_in.password,
-        role='user'
-    )
-
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
 
 @app.patch("/user/{user_id}", response_model=schemas.UserResponse)
-def update_user(user_id: int, user_in: schemas.UserUpdate, db: Session = Depends(get_db)):
+def update_user(user_id: int, user_in: schemas.UserUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    
+    if current_user.role != "admin" and current_user.id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDZEN,
+            detail="Вы можете изменять только свои собственные данные."
+        )
+    
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
@@ -97,6 +90,21 @@ def update_user(user_id: int, user_in: schemas.UserUpdate, db: Session = Depends
 
     return db_user
 
+@app.patch("/user/{user_id}/role", response_model=schemas.UserResponse)
+def change_user_role(user_id: int, new_role: str, db: Session = Depends(get_db), current_admin: models.User = Depends(require_admin)):
+    
+    if new_role not in ["user", "master", "admin"]:
+        raise HTTPException(status_code=400, detail="Неверное название роли")
+
+    db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    db_user.role = new_role
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
 @app.get("/services", response_model=List[schemas.ServiceResponse])
 def get_all_services(db: Session = Depends(get_db)):
     services = db.query(models.Service).filter(models.Service.is_active == True).all()
@@ -108,7 +116,7 @@ def get_service_by_id(service_id: int, db: Session = Depends(get_db)):
     return service
 
 @app.post("/services", response_model=schemas.ServiceResponse, status_code=status.HTTP_201_CREATED)
-def create_service(service_in: schemas.ServiceCreate, db: Session = Depends(get_db)):
+def create_service(service_in: schemas.ServiceCreate, db: Session = Depends(get_db), current_staff = Depends(require_staff)):
     existing_service = db.query(models.Service).filter(models.Service.name == service_in.name).first()
 
     if existing_service:
@@ -127,7 +135,7 @@ def create_service(service_in: schemas.ServiceCreate, db: Session = Depends(get_
     return new_service
 
 @app.patch("/service/{service_id}", response_model=schemas.ServiceResponse)
-def update_service(service_id: int, service_in: schemas.ServiceUpdate, db: Session = Depends(get_db)):
+def update_service(service_id: int, service_in: schemas.ServiceUpdate, db: Session = Depends(get_db), current_staff = Depends(require_staff)):
     db_service = db.query(models.Service).filter(models.Service.id == service_id).first()
 
     if not db_service:
@@ -149,7 +157,7 @@ def update_service(service_id: int, service_in: schemas.ServiceUpdate, db: Sessi
     return db_service
 
 @app.delete("/service/{service_id}", response_model=schemas.ServiceResponse)
-def delete_service(service_id: int, db: Session = Depends(get_db)):
+def delete_service(service_id: int, db: Session = Depends(get_db), current_admin = Depends(require_admin)):
     db_service = db.query(models.Service).filter(models.Service.id == service_id).first()
 
     if not db_service:
@@ -299,7 +307,7 @@ def delete_service_from_order(order_id: int, service_id: int, db: Session = Depe
     return db.query(models.Order).options(joinedload(models.Order.services)).filter(models.Order.id == order_id).first()
 
 @app.get("/users-logs", response_model=List[schemas.UserActivityLogResponse])
-def users_logs(db: Session = Depends(get_db)):
+def users_logs(db: Session = Depends(get_db), current_admin=Depends(require_admin)):
     users_logs = db.query(models.UserActivityLog).all()
     return users_logs
 

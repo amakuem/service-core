@@ -10,9 +10,6 @@ class UserBase(BaseModel):
     phone: Optional[str] = Field(None)
     email: EmailStr = Field(...)
 
-class UserCreate(UserBase):
-    password: str = Field(..., min_length=8)
-    
     @field_validator('phone')
     @classmethod 
     def validate_phone(cls, v: Optional[str]) -> Optional[str]:
@@ -32,6 +29,9 @@ class UserCreate(UserBase):
             )
             
         return clean_phone
+
+class UserCreate(UserBase):
+    password: str = Field(..., min_length=8)
 
 class UserUpdate(BaseModel):
     first_name: Optional[str] = Field(None, max_length=50)
