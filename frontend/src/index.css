@@ -55,13 +55,12 @@ body {
 }
 
 #root {
-  width: 100%; /* Растягиваем на всю ширину экрана */
-  min-height: 100vh; /* Занимает всю высоту экрана (svh заменяем на универсальный vh) */
+  width: 100%; 
+  min-height: 100vh; 
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  text-align: left; /* Возвращаем нормальное выравнивание текста по левому краю */
-  /* Убрали width: 1126px, margin: 0 auto и border-inline */
+  text-align: left; 
 }
 
 h1,

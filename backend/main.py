@@ -49,6 +49,11 @@ def get_all_users(db: Session = Depends(get_db), current_admin = Depends(require
 
     return users
 
+@app.get("/user/me", response_model=schemas.UserResponse)
+def get_current_user_profile(current_user: models.User = Depends(get_current_user)):
+    return current_user
+
+
 @app.get("/user/{user_id}", response_model=schemas.UserResponse)
 def get_user_by_id(user_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     if current_user.role not in ["admin", "master"] and current_user.id != user_id:
@@ -104,6 +109,7 @@ def change_user_role(user_id: int, new_role: str, db: Session = Depends(get_db),
     db.commit()
     db.refresh(db_user)
     return db_user
+
 
 @app.get("/services", response_model=List[schemas.ServiceResponse])
 def get_all_services(db: Session = Depends(get_db)):

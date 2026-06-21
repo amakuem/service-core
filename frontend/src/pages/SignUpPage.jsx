@@ -15,7 +15,6 @@ const SignUpPage = () => {
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
 
-    // Универсальный обработчик для всех инпутов
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -28,11 +27,10 @@ const SignUpPage = () => {
         setError('');
 
         try {
-            // Отправляем данные на бэкенд в формате JSON
             await authApi.register(formData);
             
             setSuccess(true);
-            // Через 2 секунды после успеха перенаправляем на страницу входа
+
             setTimeout(() => {
                 navigate('/login');
             }, 2000);
@@ -43,18 +41,15 @@ const SignUpPage = () => {
                 const detail = err.response.data.detail;
                 
                 if (typeof detail === 'string') {
-                    // Если бэк вернул простую строку (например, raise HTTPException(400, detail="..."))
                     errorMessage = detail;
                 } else if (Array.isArray(detail)) {
-                    // Если это ошибка валидации Pydantic (массив 422)
-                    // Берем первое сообщение об ошибке и локацию поля
                     const firstError = detail[0];
                     const field = firstError.loc ? firstError.loc[firstError.loc.length - 1] : '';
                     errorMessage = `Ошибка в поле [${field}]: ${firstError.msg}`;
                 }
             }
             
-            setError(errorMessage); // Теперь здесь ВСЕГДА будет строка, и React не упадет!
+            setError(errorMessage); 
         }
     };
 

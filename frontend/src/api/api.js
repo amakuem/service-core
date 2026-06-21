@@ -21,9 +21,11 @@ API.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && error.response.status === 401) {
-            console.warn('Сессия устарела. Перенаправление на вход...');
-            localStorage.removeItem('token');
-            window.location.href = '/login';
+            if (!window.location.pathname.includes('/login')) {
+                console.warn('Сессия устарела. Перенаправление на вход...');
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
         }
         return Promise.reject(error);
     }
@@ -66,6 +68,7 @@ export const userApi = {
     getById: (id) => API.get(`/user/${id}`),
     create: (userData) => API.post('/users', userData),
     update: (id, updateData) => API.patch(`/user/${id}`, updateData),
+    getMe: () => API.get('/user/me')
 }
 
 export const logsApi = {

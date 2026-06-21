@@ -17,3 +17,21 @@
   text-decoration: none;
   font-weight: bold;
 }
+
+.logoutBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;         
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-Family: inherit;
+  font-Size: inherit;
+  color: inherit;
+}
+
+.logoutIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}

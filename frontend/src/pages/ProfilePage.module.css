@@ -1,0 +1,156 @@
+.profileContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.profileCard {
+    background: var(--bg, #fff);
+    border: 1px solid var(--border, #e5e4e7);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 450px;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.avatarZone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 70px;
+    height: 70px;
+    background-color: var(--accent, #aa3bff);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.badge {
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.admin { background-color: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+.master { background-color: rgba(202, 138, 4, 0.15); color: #ca8a04; border: 1px solid rgba(202, 138, 4, 0.3); }
+.user { background-color: var(--accent-bg); color: var(--accent); border: 1px solid var(--accent-border); }
+
+.divider {
+    border: 0;
+    border-top: 1px solid var(--border, #e5e4e7);
+    margin: 24px 0;
+}
+
+.infoFields {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.infoGroup label {
+    font-size: 11px;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.infoGroup p {
+    font-size: 16px;
+    margin: 0;
+    font-weight: 500;
+    color: var(--text-h);
+}
+
+.centered, .errorContainer {
+    text-align: center;
+    padding: 60px;
+    font-size: 18px;
+    width: 100%;
+}
+.errorContainer { color: #ef4444; }
+
+.input {
+    width: 100%;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    border: 1px solid var(--border, #e5e4e7);
+    border-radius: 6px;
+    background: var(--bg, #fff);
+    color: var(--text-h, #08060d);
+    font-size: 15px;
+    margin-top: 4px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input:focus {
+    border-color: var(--accent, #aa3bff);
+}
+
+.disabledText {
+    color: #9ca3af !important; 
+}
+
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.editBtn, .saveBtn, .cancelBtn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.editBtn:hover, .saveBtn:hover, .cancelBtn:hover {
+    opacity: 0.9;
+}
+
+.editBtn {
+    background-color: var(--accent, #aa3bff);
+    color: #fff;
+    border: none;
+    width: 100%;
+}
+
+.saveBtn {
+    background-color: #10b981; 
+    color: #fff;
+    border: none;
+}
+
+.cancelBtn {
+    background-color: transparent;
+    color: var(--text, #6b6375);
+    border: 1px solid var(--border, #e5e4e7);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
