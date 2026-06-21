@@ -169,7 +169,6 @@ const ProfilePage = () => {
                         <p className={styles.disabledText}>{getRoleLabel(user.role)}</p>
                     </div>
 
-                    {/* Блок переключения кнопок в зависимости от режима */}
                     <div className={styles.actions}>
                         {isEditing ? (
                             <>

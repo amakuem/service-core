@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { authApi } from '../api/api'
+import { authApi, userApi } from '../api/api'
 import styles from './LoginPage.module.css';
 
 
@@ -22,12 +22,19 @@ const LoginPage = ({ setIsAuthenticated }) => {
 
             localStorage.setItem('token', access_token);
 
+            const profileResponse = await userApi.getMe();
+            const userRole = profileResponse.data.role;
+            localStorage.setItem('role', userRole);
+
             if (setIsAuthenticated) {
                 setIsAuthenticated(true); 
             }
+            window.dispatchEvent(new Event('authChange'));
 
             navigate('/');
         } catch(err) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
             const errorMessage = err.response?.data?.detail || 'Ошибка при входе в систему';
             setError(errorMessage);
         }

@@ -1,0 +1,187 @@
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+    font-family: 'Inter', Arial, sans-serif;
+    color: #e5e7eb; 
+}
+
+.header {
+    margin-bottom: 20px;
+    border-bottom: 2px solid #374151; 
+    padding-bottom: 10px;
+}
+
+.header h2 {
+    color: #9ca3af; 
+    margin-bottom: 5px;
+}
+
+.header p {
+    color: #6b7280;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    background: #1f2937; 
+    border: 1px solid #374151;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    color: #d1d5db;
+}
+
+.table th, .table td {
+    padding: 16px 18px;
+    border-bottom: 1px solid #374151; 
+}
+
+.table th {
+    background-color: #111827; 
+    color: #9ca3af;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.row {
+    transition: background-color 0.2s ease;
+}
+
+.row:hover {
+    background-color: #374151; 
+}
+
+.deviceName {
+    font-weight: 500;
+    color: #f3f4f6;
+    font-size: 15px;
+}
+
+.serial {
+    color: #9ca3af;
+    font-size: 12px;
+}
+
+.statusBadge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+    letter-spacing: 0.3px;
+}
+
+.new { 
+    background-color: rgba(59, 130, 246, 0.1); 
+    color: #60a5fa; 
+    border: 1px solid rgba(96, 165, 250, 0.4);
+}
+.diagnostics { 
+    background-color: rgba(249, 115, 22, 0.1); 
+    color: #fb923c; 
+    border: 1px solid rgba(251, 146, 60, 0.4);
+}
+.in_progress { 
+    background-color: rgba(34, 197, 94, 0.1); 
+    color: #4ade80; 
+    border: 1px solid rgba(74, 222, 128, 0.4);
+}
+.ready { 
+    background-color: rgba(168, 85, 247, 0.1); 
+    color: #c084fc; 
+    border: 1px solid rgba(192, 132, 252, 0.4);
+}
+.completed { 
+    background-color: rgba(107, 114, 128, 0.1); 
+    color: #9ca3af; 
+    border: 1px solid rgba(156, 163, 175, 0.4);
+}
+
+.unassigned {
+    color: #6b7280;
+    font-style: italic;
+    font-size: 14px;
+}
+
+.detailsBtn {
+    background-color: #3b82f6; 
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.detailsBtn:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px); 
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+}
+
+.detailsBtn:active {
+    transform: translateY(0);
+}
+
+.centered, .errorContainer, .noOrders {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 18px;
+    color: #9ca3af;
+}
+
+.filtersPanel {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 20px;
+    background: #1f2937;
+    padding: 16px 20px;
+    border-radius: 8px;
+    border: 1px solid #374151;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.filterGroup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.filterGroup label {
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.select {
+    background-color: #111827;
+    color: #e5e7eb;
+    border: 1px solid #4b5563;
+    padding: 8px 14px;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.select:hover, .select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.timeLabel {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+}

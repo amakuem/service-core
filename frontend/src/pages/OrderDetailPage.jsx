@@ -15,11 +15,9 @@ const OrderDetailPage = () => {
     useEffect(() => {
         const fetchOrderDetails = async () => {
             try {
-                // Загружаем сам заказ
-                const orderResponse = await orderApi.getById(id); // Убедись, что в orderApi есть метод getById
+                const orderResponse = await orderApi.getById(id); 
                 setOrder(orderResponse.data);
 
-                // Загружаем список услуг для сопоставления названий
                 const servicesResponse = await serviceApi.getAll();
                 setServices(servicesResponse.data);
             } catch (err) {

@@ -42,7 +42,6 @@
     color: var(--text, #6b6375);
 }
 
-/* Таблица и строки */
 .tableWrapper {
     background: var(--bg, #fff);
     border: 1px solid var(--border, #e5e4e7);
@@ -75,7 +74,7 @@
 }
 
 .clickableRow:hover {
-    background-color: rgba(170, 59, 255, 0.04); /* Легкий оверлей цвета бренда при наведении */
+    background-color: rgba(170, 59, 255, 0.04);
 }
 
 .ordersTable tr:last-child td {
@@ -103,7 +102,6 @@
     color: var(--text-h, #08060d);
 }
 
-/* Статусы */
 .statusBadge {
     padding: 6px 12px;
     border-radius: 20px;
@@ -150,7 +148,6 @@
     border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-/* Структура модалки создания заказа */
 .modalOverlay {
     position: fixed;
     top: 0;
@@ -216,7 +213,6 @@
     font-family: inherit;
 }
 
-/* Управление услугами в создании заказа */
 .selectRow {
     display: flex;
     gap: 10px;
@@ -283,7 +279,6 @@
     font-size: 11px;
 }
 
-/* Действия в модалках */
 .modalActions {
     display: flex;
     justify-content: flex-end;
@@ -315,7 +310,6 @@
     cursor: not-allowed;
 }
 
-/* Состояния страницы */
 .centered, .errorContainer {
     text-align: center;
     padding: 60px;

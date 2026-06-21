@@ -1,30 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Добавили импорт роутера
+import { useNavigate } from "react-router-dom"; 
 import { orderApi, userApi, serviceApi } from "../api/api";
 import styles from './MyOrdersPage.module.css';
 
 const MyOrdersPage = () => {
-    const navigate = useNavigate(); // Инициализация навигации
+    const navigate = useNavigate(); 
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [services, setServices] = useState([]);
     const [userId, setUserId] = useState(null);
 
-    // Состояния для модального окна создания заказа
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [createLoading, setCreateLoading] = useState(false);
 
-    // Поля формы
     const [formData, setFormData] = useState({
         device_name: '',
         serial_number: '',
         issue_description: ''
     });
 
-    // ID текущей выбранной в селекте услуги
     const [currentSelectedServiceId, setCurrentSelectedServiceId] = useState('');
-    // Список услуг, которые пользователь УЖЕ добавил в этот заказ
     const [selectedServicesList, setSelectedServicesList] = useState([]);
 
     const loadData = async () => {
@@ -213,7 +209,6 @@ const MyOrdersPage = () => {
                 </div>
             )}
 
-            {/* МОДАЛЬНОЕ ОКНО СОЗДАНИЯ ЗАКАЗА */}
             {isModalOpen && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modalContent}>
