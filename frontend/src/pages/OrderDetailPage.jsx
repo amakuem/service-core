@@ -1,0 +1,147 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { orderApi, serviceApi } from "../api/api";
+import styles from "./OrderDetailPage.module.css";
+
+const OrderDetailPage = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    
+    const [order, setOrder] = useState(null);
+    const [services, setServices] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        const fetchOrderDetails = async () => {
+            try {
+                // Загружаем сам заказ
+                const orderResponse = await orderApi.getById(id); // Убедись, что в orderApi есть метод getById
+                setOrder(orderResponse.data);
+
+                // Загружаем список услуг для сопоставления названий
+                const servicesResponse = await serviceApi.getAll();
+                setServices(servicesResponse.data);
+            } catch (err) {
+                console.error(err);
+                setError(err.response?.data?.detail || "Не удалось загрузить информацию о заказе");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrderDetails();
+    }, [id]);
+
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 'new': return 'Новый';
+            case 'diagnostics': return 'Диагностика';
+            case 'wfp': return 'Ожидает з/п или оплаты';
+            case 'in_progress': return 'В работе';
+            case 'ready': return 'Готов к выдаче';
+            case 'completed': return 'Завершен';
+            default: return status;
+        }
+    };
+
+    const calculateTotalPrice = () => {
+        if (!order?.services || order.services.length === 0) return "0.00 ₽";
+        const total = order.services.reduce((sum, item) => {
+            const serviceInfo = services.find(s => s.id === item.service_id);
+            const price = serviceInfo ? parseFloat(serviceInfo.base_price) : parseFloat(item.fixed_price || 0);
+            return sum + (price * item.quantity);
+        }, 0);
+        return `${total.toFixed(2)} ₽`;
+    };
+
+    if (loading) return <div className={styles.centered}>⏳ Загрузка деталей заказа...</div>;
+    if (error) return <div className={styles.errorContainer}>⚠️ {error} <br/><button onClick={() => navigate("/orders")} className={styles.backBtn}>Назад к списку</button></div>;
+    if (!order) return <div className={styles.centered}>Заказ не найден</div>;
+
+    return (
+        <div className={styles.container}>
+            <button onClick={() => navigate(-1)} className={styles.backBtn}>
+                ← Назад к списку
+            </button>
+
+            <div className={styles.card}>
+                <div className={styles.header}>
+                    <div>
+                        <h2 className={styles.title}>Заказ #{order.id}</h2>
+                        <p className={styles.date}>Оформлен: {new Date(order.created_at).toLocaleString('ru-RU')}</p>
+                    </div>
+                    <span className={`${styles.statusBadge} ${styles[order.status]}`}>
+                        {getStatusLabel(order.status)}
+                    </span>
+                </div>
+
+                <hr className={styles.divider} />
+
+                <div className={styles.section}>
+                    <h3>Информация об устройстве</h3>
+                    <div className={styles.infoGrid}>
+                        <div className={styles.infoBlock}>
+                            <span className={styles.label}>Устройство:</span>
+                            <span className={styles.value}>{order.device_name}</span>
+                        </div>
+                        <div className={styles.infoBlock}>
+                            <span className={styles.label}>Серийный номер / IMEI:</span>
+                            <span className={styles.value}>{order.serial_number || "—"}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className={styles.section}>
+                    <h3>Описание неисправности (от клиента)</h3>
+                    <div className={styles.box}>
+                        {order.issue_description}
+                    </div>
+                </div>
+
+                <div className={styles.section}>
+                    <h3>Ход выполнения и заметки мастера</h3>
+                    <div className={styles.boxSecondary}>
+                        <p>
+                            <strong>Мастер:</strong>{" "}
+                            {order.master_name || order.master_last_name
+                                ? `${order.master_name || ""} ${order.master_last_name || ""}`.trim()
+                                : "Назначается мастером..."}
+                        </p>
+                        <p>
+                            <strong>Техническое заключение:</strong>{" "}
+                            {order.master_comment || "Диагностика еще не завершена."}
+                        </p>
+                        {order.estimated_ready_date && (
+                            <p><strong>Планируемая дата готовности:</strong> {new Date(order.estimated_ready_date).toLocaleDateString('ru-RU')}</p>
+                        )}
+                    </div>
+                </div>
+
+                <div className={styles.section}>
+                    <h3>Выполняемые услуги</h3>
+                    <ul className={styles.servicesList}>
+                        {order.services?.map((item, idx) => {
+                            const serviceInfo = services.find(s => s.id === item.service_id);
+                            return (
+                                <li key={idx} className={styles.serviceItem}>
+                                    <span>{serviceInfo ? serviceInfo.name : 'Услуга'} (x{item.quantity})</span>
+                                    <span className={styles.servicePrice}>
+                                        {serviceInfo ? `${parseFloat(serviceInfo.base_price).toFixed(2)} ₽` : `${parseFloat(item.fixed_price).toFixed(2)} ₽`}
+                                    </span>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </div>
+
+                <div className={styles.totalRow}>
+                    <span>Итоговая стоимость:</span>
+                    <span className={styles.totalPrice}>{calculateTotalPrice()}</span>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default OrderDetailPage;

@@ -178,12 +178,38 @@ def delete_service(service_id: int, db: Session = Depends(get_db), current_admin
 
 @app.get("/orders", response_model=List[schemas.OrderResponse])
 def get_all_orders(db: Session = Depends(get_db)):
-    orders = db.query(models.Order).options(joinedload(models.Order.services)).all()
+    orders = db.query(models.Order).options(
+        joinedload(models.Order.services),
+        joinedload(models.Order.master)
+    ).all()
+    
+    for order in orders:
+        if order.master:
+            order.master_name = order.master.first_name
+            order.master_last_name = order.master.last_name
+        else:
+            order.master_name = None
+            order.master_last_name = None
+            
     return orders
 
 @app.get("/order/{order_id}", response_model=schemas.OrderResponse)
 def get_order_by_id(order_id: int, db: Session = Depends(get_db)):
-    order = db.query(models.Order).options(joinedload(models.Order.services)).filter(models.Order.id == order_id).first()
+    order = db.query(models.Order).options(
+        joinedload(models.Order.services),
+        joinedload(models.Order.master)
+    ).filter(models.Order.id == order_id).first()
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Заказ не найден")
+    
+    if order.master:
+        order.master_name = order.master.first_name
+        order.master_last_name = order.master.last_name
+    else:
+        order.master_name = None
+        order.master_last_name = None
+        
     return order
 
 @app.post("/orders", response_model=schemas.OrderResponse, status_code=status.HTTP_201_CREATED)

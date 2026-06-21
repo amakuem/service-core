@@ -6,6 +6,8 @@ import ServicesPage from './pages/ServicesPage'
 import LoginPage from './pages/LoginPage'
 import SignUpPage from './pages/SignUpPage'
 import ProfilePage from './pages/ProfilePage';
+import MyOrdersPage from './pages/MyOrdersPage';
+import OrderDetailPage from './pages/OrderDetailPage';
 
 function App() {
 
@@ -44,9 +46,13 @@ function App() {
 
         {isAuthenticated ? (
           <>
-            <Link to="/profile" className="link-sign">
+            <Link to="/my-orders" className="link-sign">
+              Мои заказы
+            </Link>
+            <Link to="/profile" className="link">
               Профиль
             </Link>
+
             <button onClick={handleLogout} className="logoutBtn">
               <img src={logoutIcon} alt="Выход" className="logoutIcon" />
               Выйти
@@ -74,6 +80,9 @@ function App() {
           <Route path="/sign-up" element={<SignUpPage />} />
 
           <Route path="/profile" element={<ProfilePage />} />
+
+          <Route path="/my-orders" element={<MyOrdersPage />} />
+          <Route path="/orders/:id" element={<OrderDetailPage />} />
           
           <Route path="*" element={<h2>⚠️ Страница не найдена (404)</h2>} />
         </Routes>

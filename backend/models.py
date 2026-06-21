@@ -51,6 +51,7 @@ class Order(Base):
         cascade="all, delete-orphan", 
         passive_deletes=True
     )
+    master = relationship("User", foreign_keys=[master_id])
 
 class OrderService(Base):
     __tablename__ = "order_services"

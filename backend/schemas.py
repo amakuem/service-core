@@ -103,6 +103,8 @@ class OrderResponse(OrderBase):
     master_comment: Optional[str] = None
     client_id: int
     master_id: Optional[int] = None
+    master_name: Optional[str] = None
+    master_last_name: Optional[str] = None
     services: list[OrderServiceResponse] = []
     created_at: datetime
     updated_at: datetime
