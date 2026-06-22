@@ -127,3 +127,17 @@ class UserActivityLogResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class NotificationBase(BaseModel):
+    user_id: int
+    order_id: Optional[int] = Field(None)
+    notification_type: str = Field(..., max_length=50)
+    title: str = Field(..., max_length=255)
+    message: str
+
+class NotificationResponse(NotificationBase):
+    id: int
+    is_read: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

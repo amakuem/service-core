@@ -32,6 +32,18 @@ app.add_middleware(
 async def root():
     return {"message": "Hello, World!"}
 
+def get_status_label(status_name: str) -> str:
+    statuses = {
+        'new': 'Новый',
+        'diagnostics': 'Диагностика',
+        'wfp': 'Ожидает з/п или оплаты',
+        'in_progress': 'В работе',
+        'ready': 'Готов к выдаче',
+        'completed': 'Завершен',
+        'cancelled': 'Отменен'
+    }
+    return statuses.get(status_name, status_name)
+
 @app.get("/test-db")
 def test_database_connectiono(db: Session = Depends(get_db)):
     try:
@@ -247,6 +259,18 @@ def create_order(order_in: schemas.OrderCreate, db: Session = Depends(get_db)):
 
         db.add(new_order_service)
 
+    masters = db.query(models.User).filter(models.User.role == "master").all()
+    
+    for master in masters:
+        new_notification = models.Notification(
+            user_id=master.id,
+            order_id=new_order.id,
+            notification_type="new_order",
+            title="🆕 Поступил новый заказ!",
+            message=f"В систему добавлен заказ #{new_order.id} ({new_order.device_name}). Требуется диагностика."
+        )
+        db.add(new_notification)
+
     db.commit()
 
     db.refresh(new_order)
@@ -262,6 +286,9 @@ def update_order(order_id: int, order_in: schemas.OrderUpdate, db: Session = Dep
     
     if not db_order:
         raise HTTPException(status_code=404, detail="Заказ не найден")
+
+    old_status = db_order.status
+    old_comment = db_order.master_comment
     
     update_data = order_in.model_dump(exclude_unset=True, exclude={"services"})
 
@@ -296,6 +323,26 @@ def update_order(order_id: int, order_in: schemas.OrderUpdate, db: Session = Dep
                 db.add(new_order_service)
 
         db_order.updated_at = func.now()
+
+    if order_in.status is not None and order_in.status != old_status:
+        status_notification = models.Notification(
+            user_id=db_order.client_id,
+            order_id=db_order.id,
+            notification_type="status_changed",
+            title="Статус заказа обновлен",
+            message=f"Статус вашего заказа #{db_order.id} ({db_order.device_name}) изменился на: \"{get_status_label(order_in.status)}\"."
+        )
+        db.add(status_notification)
+
+    if order_in.master_comment is not None and order_in.master_comment != old_comment:
+        comment_notification = models.Notification(
+            user_id=db_order.client_id,
+            order_id=db_order.id,
+            notification_type="comment_changed",
+            title="Новое заключение мастера",
+            message=f"Мастер добавил техническую заметку к вашему заказу #{db_order.id}: \"{order_in.master_comment}\"."
+        )
+        db.add(comment_notification)
             
     db.commit()
     db.refresh(db_order)
@@ -311,6 +358,16 @@ def delete_order(order_id: int, db: Session = Depends(get_db)):
 
     if not db_order:
         raise HTTPException(status_code=404, detail="Заказ не найден")
+
+    if db_order.master_id:
+        cancel_notification = models.Notification(
+            user_id=db_order.master_id,
+            order_id=db_order.id, 
+            notification_type="cancelled", 
+            title="Заказ удален из системы",
+            message=f"Заказ #{db_order.id} ({db_order.device_name}), который был закреплен за вами, полностью удален."
+        )
+        db.add(cancel_notification)
     
     db.delete(db_order)
     db.commit()
@@ -343,3 +400,19 @@ def users_logs(db: Session = Depends(get_db), current_admin=Depends(require_admi
     users_logs = db.query(models.UserActivityLog).all()
     return users_logs
 
+@app.get("/notifications", response_model=List[schemas.NotificationResponse])
+def get_my_notifications(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    notifications = db.query(models.Notification)\
+        .filter(models.Notification.user_id == current_user.id)\
+        .order_by(models.Notification.created_at.desc())\
+        .all()
+    return notifications
+
+@app.post("/notifications/mark-as-read")
+def mark_notifications_as_read(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db.query(models.Notification)\
+        .filter(models.Notification.user_id == current_user.id, models.Notification.is_read == False)\
+        .update({"is_read": True}, synchronize_session=False)
+    
+    db.commit()
+    return {"status": "success", "message": "Все уведомления отмечены как прочитанные"}
