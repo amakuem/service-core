@@ -10,6 +10,7 @@ import MyOrdersPage from './pages/MyOrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import OrdersPage from './pages/OrdersPage';
 import MasterOrdersPage from './pages/MasterOrdersPage';
+import NotificationBell from './components/NotificationBell';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
@@ -74,6 +75,8 @@ function App() {
                 Мои заказы
               </Link>
             )}
+
+            <NotificationBell />
             
             <Link to="/profile" className="link">
               Профиль

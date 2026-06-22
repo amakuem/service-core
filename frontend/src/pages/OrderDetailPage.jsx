@@ -35,7 +35,7 @@ const OrderDetailPage = () => {
                 console.error(err);
                 setError(err.response?.data?.detail || "Не удалось загрузить информацию о заказе");
             } finally {
-                setLoading(false);
+                loading && setLoading(false);
             }
         };
 
@@ -80,7 +80,7 @@ const OrderDetailPage = () => {
         switch (status) {
             case 'new': return 'Новый';
             case 'diagnostics': return 'Диагностика';
-            case 'wfp': return 'Ожидает з/п или оплаты';
+            case 'wfp': return 'Ожидает запчастей';
             case 'in_progress': return 'В работе';
             case 'ready': return 'Готов к выдаче';
             case 'completed': return 'Завершен';
@@ -103,6 +103,10 @@ const OrderDetailPage = () => {
     if (!order) return <div className={styles.centered}>Заказ не найден</div>;
 
     const isStaff = currentUser?.role === "master" || currentUser?.role === "admin";
+    const isAdmin = currentUser?.role === "admin";
+    const isAssignedMaster = currentUser?.role === "master" && order?.master_id === currentUser?.id;
+    
+    const canEdit = isAdmin || isAssignedMaster;
 
     return (
         <div className={styles.container}>
@@ -117,7 +121,7 @@ const OrderDetailPage = () => {
                         <p className={styles.date}>Оформлен: {new Date(order.created_at).toLocaleString('ru-RU')}</p>
                     </div>
                     
-                    {isStaff ? (
+                    {canEdit ? (
                         <div className={styles.statusSelectWrapper}>
                             <select
                                 value={order.status}
@@ -182,7 +186,7 @@ const OrderDetailPage = () => {
                         <div className={styles.technicalConclusion}>
                             <strong className={styles.conclusionLabel}>Техническое заключение:</strong>
                             
-                            {isStaff ? (
+                            {canEdit ? (
                                 <div className={styles.editCommentBlock}>
                                     <textarea
                                         className={styles.textarea}

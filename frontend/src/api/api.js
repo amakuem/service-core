@@ -74,3 +74,8 @@ export const userApi = {
 export const logsApi = {
     getAll: () => API.get('/users-logs')
 }
+
+export const notificationApi = {
+    getAll: () => API.get('/notifications'),
+    markAsRead: () => API.post('/notifications/mark-as-read')
+}
