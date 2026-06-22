@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { orderApi, serviceApi } from "../api/api";
+import { orderApi, serviceApi, userApi } from "../api/api"; 
 import styles from "./OrderDetailPage.module.css";
 
 const OrderDetailPage = () => {
@@ -12,11 +12,22 @@ const OrderDetailPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    const [currentUser, setCurrentUser] = useState(null);
+    const [masterComment, setMasterComment] = useState("");
+    const [isSavingComment, setIsSavingComment] = useState(false);
+    const [saveSuccess, setSaveSuccess] = useState(false);
+
+    const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+
     useEffect(() => {
         const fetchOrderDetails = async () => {
             try {
+                const userResponse = await userApi.getMe();
+                setCurrentUser(userResponse.data);
+
                 const orderResponse = await orderApi.getById(id); 
                 setOrder(orderResponse.data);
+                setMasterComment(orderResponse.data.master_comment || "");
 
                 const servicesResponse = await serviceApi.getAll();
                 setServices(servicesResponse.data);
@@ -30,6 +41,40 @@ const OrderDetailPage = () => {
 
         fetchOrderDetails();
     }, [id]);
+
+    const handleStatusChange = async (newStatus) => {
+        setIsUpdatingStatus(true);
+        try {
+            if (orderApi.update) {
+                await orderApi.update(id, { status: newStatus });
+                setOrder(prev => ({ ...prev, status: newStatus }));
+            } else {
+                console.warn("Метод orderApi.update(id, data) не найден");
+            }
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.detail || "Не удалось обновить статус заказа");
+        } finally {
+            setIsUpdatingStatus(false);
+        }
+    };
+
+    const handleSaveComment = async () => {
+        setIsSavingComment(true);
+        setSaveSuccess(false);
+        try {
+            if (orderApi.update) {
+                await orderApi.update(id, { master_comment: masterComment });
+            }
+            setSaveSuccess(true);
+            setTimeout(() => setSaveSuccess(false), 3000);
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.detail || "Не удалось сохранить комментарий");
+        } finally {
+            setIsSavingComment(false);
+        }
+    };
 
     const getStatusLabel = (status) => {
         switch (status) {
@@ -57,6 +102,8 @@ const OrderDetailPage = () => {
     if (error) return <div className={styles.errorContainer}>⚠️ {error} <br/><button onClick={() => navigate("/orders")} className={styles.backBtn}>Назад к списку</button></div>;
     if (!order) return <div className={styles.centered}>Заказ не найден</div>;
 
+    const isStaff = currentUser?.role === "master" || currentUser?.role === "admin";
+
     return (
         <div className={styles.container}>
             <button onClick={() => navigate(-1)} className={styles.backBtn}>
@@ -69,9 +116,30 @@ const OrderDetailPage = () => {
                         <h2 className={styles.title}>Заказ #{order.id}</h2>
                         <p className={styles.date}>Оформлен: {new Date(order.created_at).toLocaleString('ru-RU')}</p>
                     </div>
-                    <span className={`${styles.statusBadge} ${styles[order.status]}`}>
-                        {getStatusLabel(order.status)}
-                    </span>
+                    
+                    {isStaff ? (
+                        <div className={styles.statusSelectWrapper}>
+                            <select
+                                value={order.status}
+                                onChange={(e) => handleStatusChange(e.target.value)}
+                                className={`${styles.statusSelect} ${styles[order.status]}`}
+                                disabled={isUpdatingStatus}
+                                title="Изменить статус заказа"
+                            >
+                                <option value="new">Новый</option>
+                                <option value="diagnostics">Диагностика</option>
+                                <option value="wfp">Ожидает з/п или оплаты</option>
+                                <option value="in_progress">В работе</option>
+                                <option value="ready">Готов к выдаче</option>
+                                <option value="completed">Завершен</option>
+                            </select>
+                            {isUpdatingStatus && <span className={styles.miniLoader}>⏳</span>}
+                        </div>
+                    ) : (
+                        <span className={`${styles.statusBadge} ${styles[order.status]}`}>
+                            {getStatusLabel(order.status)}
+                        </span>
+                    )}
                 </div>
 
                 <hr className={styles.divider} />
@@ -106,13 +174,40 @@ const OrderDetailPage = () => {
                                 ? `${order.master_name || ""} ${order.master_last_name || ""}`.trim()
                                 : "Назначается мастером..."}
                         </p>
-                        <p>
-                            <strong>Техническое заключение:</strong>{" "}
-                            {order.master_comment || "Диагностика еще не завершена."}
-                        </p>
+                        
                         {order.estimated_ready_date && (
                             <p><strong>Планируемая дата готовности:</strong> {new Date(order.estimated_ready_date).toLocaleDateString('ru-RU')}</p>
                         )}
+                        
+                        <div className={styles.technicalConclusion}>
+                            <strong className={styles.conclusionLabel}>Техническое заключение:</strong>
+                            
+                            {isStaff ? (
+                                <div className={styles.editCommentBlock}>
+                                    <textarea
+                                        className={styles.textarea}
+                                        value={masterComment}
+                                        onChange={(e) => setMasterComment(e.target.value)}
+                                        placeholder="Введите результаты диагностики, описание проделанной работы или список необходимых запчастей..."
+                                        rows={4}
+                                    />
+                                    <div className={styles.actionRow}>
+                                        <button
+                                            onClick={handleSaveComment}
+                                            className={styles.saveBtn}
+                                            disabled={isSavingComment}
+                                        >
+                                            {isSavingComment ? "Сохранение..." : "Сохранить заметку 💾"}
+                                        </button>
+                                        {saveSuccess && <span className={styles.successLabel}>✓ Успешно сохранено!</span>}
+                                    </div>
+                                </div>
+                            ) : (
+                                <p className={styles.clientCommentText}>
+                                    {masterComment ? masterComment : "Диагностика еще не завершена."}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
 

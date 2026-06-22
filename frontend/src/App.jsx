@@ -9,6 +9,7 @@ import ProfilePage from './pages/ProfilePage';
 import MyOrdersPage from './pages/MyOrdersPage';
 import OrderDetailPage from './pages/OrderDetailPage';
 import OrdersPage from './pages/OrdersPage';
+import MasterOrdersPage from './pages/MasterOrdersPage';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
@@ -59,14 +60,21 @@ function App() {
 
         {isAuthenticated ? (
           <>
-            {isStaff && (
-              <Link to="/orders" className="link-sign">
-                Заказы
+            {isStaff ? (
+              <>
+                <Link to="/orders" className="link-sign">
+                  Заказы
+                </Link>
+                <Link to="/master/my-orders" className="link">
+                  Мои заказы
+                </Link>
+              </>
+            ) :(
+              <Link to="/my-orders" className={isStaff ? "link" : "link-sign"}>
+                Мои заказы
               </Link>
             )}
-            <Link to="/my-orders" className={isStaff ? "link" : "link-sign"}>
-              Мои заказы
-            </Link>
+            
             <Link to="/profile" className="link">
               Профиль
             </Link>
@@ -108,6 +116,10 @@ function App() {
           <Route 
             path="/orders" 
             element={isStaff ? <OrdersPage /> : <Navigate to="/" replace />} 
+          />
+          <Route 
+            path="/master/my-orders"
+            element={isStaff ? <MasterOrdersPage /> : <Navigate to="/" replace />}
           />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/order/:id" element={<OrderDetailPage />} />
