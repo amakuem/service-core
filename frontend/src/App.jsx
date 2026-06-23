@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import logoutIcon from './assets/logout.png'
+import adminIcon from './assets/icon-admin.png'
 import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
 import './App.css'
 import ServicesPage from './pages/ServicesPage'
@@ -14,6 +15,7 @@ import NotificationBell from './components/NotificationBell';
 import AdminLayout from './components/AdminLayout';
 import AdminServicesPage from './pages/AdminServicesPage';
 import AdminLogsPage from './pages/AdminLogsPage';
+import AdminUsersPage from './pages/AdminUsersPage';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
@@ -54,11 +56,7 @@ function App() {
         <Link to="/" className="link">
           Услуги
         </Link>
-        {isStaff && (
-          <Link to="/admin" className="link adminBtn">
-            ⚙️ Админка
-          </Link>
-        )}
+        
 
 
 
@@ -66,7 +64,7 @@ function App() {
           <>
             {isStaff ? (
               <>
-                <Link to="/orders" className="link-sign">
+                <Link to="/orders" className="link">
                   Заказы
                 </Link>
                 <Link to="/master/my-orders" className="link">
@@ -74,12 +72,18 @@ function App() {
                 </Link>
               </>
             ) :(
-              <Link to="/my-orders" className={isStaff ? "link" : "link-sign"}>
+              <Link to="/my-orders" className="link">
                 Мои заказы
               </Link>
             )}
-
-            <NotificationBell />
+            <div className='link-sign'>
+              <NotificationBell /> 
+            </div>
+            {isStaff && (
+              <Link to="/admin" className="link adminBtn">
+                <img src={adminIcon} alt="Админ панель" className="adminIcon" />
+              </Link>
+            )}
             
             <Link to="/profile" className="link">
               Профиль
@@ -134,16 +138,14 @@ function App() {
             path="/admin" 
             element={userRole === 'admin' ? <AdminLayout /> : <Navigate to="/" replace />}
           >
-            {/* Если админ зашел просто на /admin, перенаправляем его сразу на /admin/services */}
             <Route index element={<Navigate to="services" replace />} />
             
-            {/* Подстраницы, которые будут рендериться ВНУТРИ AdminLayout */}
             <Route path="services" element={<AdminServicesPage />} />
             
-            {/* Сюда переносишь свою страницу логов */}
             <Route path="logs" element={<AdminLogsPage />} /> 
             
-            {/* Будущие страницы */}
+            <Route path="users" element={<AdminUsersPage />} />
+            
             {/* <Route path="users" element={<div>Управление пользователями (в разработке)</div>} /> */}
           </Route>
 

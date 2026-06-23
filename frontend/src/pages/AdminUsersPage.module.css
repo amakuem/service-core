@@ -1,0 +1,214 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.pageHeader h2 {
+    margin: 0 0 6px 0;
+    font-size: 24px;
+    color: #111827;
+}
+
+.subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.addBtn {
+    background-color: #aa3bff;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.addBtn:hover {
+    background-color: #8a2ecc;
+}
+
+.tableWrapper {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.table th {
+    background-color: #f9fafb;
+    padding: 14px 16px;
+    font-weight: 600;
+    color: #4b5563;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+}
+
+.fontBold {
+    font-weight: 600;
+}
+
+.muted {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.roleBadge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.roleAdmin {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.roleMaster {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.roleUser {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.roleSelect {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background-color: #fff;
+    color: #374151;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+}
+
+.roleSelect:focus {
+    border-color: #aa3bff;
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+}
+
+.modal {
+    background: white;
+    padding: 28px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal h3 {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    color: #111827;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.formGroup label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+.formGroup input, .modalSelect {
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+}
+
+.formGroup input:focus, .modalSelect:focus {
+    border-color: #aa3bff;
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.cancelBtn {
+    background-color: white;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.saveBtn {
+    background-color: #aa3bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.saveBtn:disabled, .cancelBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.centered {
+    text-align: center;
+    padding: 40px;
+    color: #6b7280;
+}

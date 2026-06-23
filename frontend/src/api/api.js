@@ -66,9 +66,9 @@ export const serviceApi = {
 export const userApi = {
     getAll: () => API.get('/users'),
     getById: (id) => API.get(`/user/${id}`),
-    create: (userData) => API.post('/users', userData),
     update: (id, updateData) => API.patch(`/user/${id}`, updateData),
-    getMe: () => API.get('/user/me')
+    getMe: () => API.get('/user/me'),
+    changeRole: (id, role) => API.patch(`/user/${id}/role?new_role=${role}`)
 }
 
 export const logsApi = {

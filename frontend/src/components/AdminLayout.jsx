@@ -15,13 +15,13 @@ const AdminLayout = () => {
                 </div>
                 <nav className={styles.sidebarNav}>
                     <Link to="/admin/services" className={`${styles.navLink} ${isActive("/admin/services")}`}>
-                        🛠️ Управление услугами
+                        Управление услугами
                     </Link>
                     <Link to="/admin/logs" className={`${styles.navLink} ${isActive("/admin/logs")}`}>
-                        📜 Логи системы
+                        Логи системы
                     </Link>
                     <Link to="/admin/users" className={`${styles.navLink} ${isActive("/admin/users")}`}>
-                        👥 Пользователи
+                        Пользователи
                     </Link>
                 </nav>
             </aside>
