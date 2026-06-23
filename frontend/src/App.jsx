@@ -13,6 +13,7 @@ import MasterOrdersPage from './pages/MasterOrdersPage';
 import NotificationBell from './components/NotificationBell';
 import AdminLayout from './components/AdminLayout';
 import AdminServicesPage from './pages/AdminServicesPage';
+import AdminLogsPage from './pages/AdminLogsPage';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
@@ -53,11 +54,6 @@ function App() {
         <Link to="/" className="link">
           Услуги
         </Link>
-        {isStaff && (
-          <Link to="/logs" className="link">
-            Логи системы
-          </Link>
-        )}
         {isStaff && (
           <Link to="/admin" className="link adminBtn">
             ⚙️ Админка
@@ -145,7 +141,7 @@ function App() {
             <Route path="services" element={<AdminServicesPage />} />
             
             {/* Сюда переносишь свою страницу логов */}
-            {/* <Route path="logs" element={<div>Страница логов (замени на свой компонент)</div>} />  */}
+            <Route path="logs" element={<AdminLogsPage />} /> 
             
             {/* Будущие страницы */}
             {/* <Route path="users" element={<div>Управление пользователями (в разработке)</div>} /> */}
