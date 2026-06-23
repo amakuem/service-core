@@ -11,6 +11,8 @@ import OrderDetailPage from './pages/OrderDetailPage';
 import OrdersPage from './pages/OrdersPage';
 import MasterOrdersPage from './pages/MasterOrdersPage';
 import NotificationBell from './components/NotificationBell';
+import AdminLayout from './components/AdminLayout';
+import AdminServicesPage from './pages/AdminServicesPage';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
@@ -54,6 +56,11 @@ function App() {
         {isStaff && (
           <Link to="/logs" className="link">
             Логи системы
+          </Link>
+        )}
+        {isStaff && (
+          <Link to="/admin" className="link adminBtn">
+            ⚙️ Админка
           </Link>
         )}
 
@@ -126,6 +133,25 @@ function App() {
           />
           <Route path="/orders/:id" element={<OrderDetailPage />} />
           <Route path="/order/:id" element={<OrderDetailPage />} />
+
+          <Route 
+            path="/admin" 
+            element={userRole === 'admin' ? <AdminLayout /> : <Navigate to="/" replace />}
+          >
+            {/* Если админ зашел просто на /admin, перенаправляем его сразу на /admin/services */}
+            <Route index element={<Navigate to="services" replace />} />
+            
+            {/* Подстраницы, которые будут рендериться ВНУТРИ AdminLayout */}
+            <Route path="services" element={<AdminServicesPage />} />
+            
+            {/* Сюда переносишь свою страницу логов */}
+            {/* <Route path="logs" element={<div>Страница логов (замени на свой компонент)</div>} />  */}
+            
+            {/* Будущие страницы */}
+            {/* <Route path="users" element={<div>Управление пользователями (в разработке)</div>} /> */}
+          </Route>
+
+
           
           <Route path="*" element={<h2>⚠️ Страница не найдена (404)</h2>} />
         </Routes>

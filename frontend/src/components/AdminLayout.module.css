@@ -1,0 +1,60 @@
+.adminContainer {
+    display: flex;
+    min-height: calc(100vh - 60px); 
+    background-color: #f9fafb;
+}
+
+.sidebar {
+    width: 260px;
+    background-color: #1f2937; 
+    color: white;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #374151;
+}
+
+.sidebarHeader {
+    padding: 0 20px;
+    margin-bottom: 24px;
+}
+
+.sidebarHeader h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #f3f4f6;
+    font-weight: 600;
+}
+
+.sidebarNav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.navLink {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #9ca3af;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+}
+
+.navLink:hover {
+    background-color: #374151;
+    color: white;
+}
+
+.activeLink {
+    background-color: #aa3bff; 
+    color: white !important;
+}
+
+.contentArea {
+    flex: 1;
+    padding: 30px;
+    overflow-y: auto;
+}

@@ -19,18 +19,20 @@ function ServicesPage(){
 
     if (error) return <div style={{ padding: '20px', color: 'red', fontSize: '18px' }}>❌ {error}</div>
 
+    const activeServices = services.filter(service => service.is_active);
+
     return (
         <div className={styles.container}>
             <h1 className={styles.title}>🛠️ Прайс-лист услуг сервисного центра</h1>
             
-            {services.length === 0 ? (
+            {activeServices.length === 0 ? (
                 <p>В базе данных пока нет ни одной услуги.</p>
             ) : (
                 <div className={styles.grid}>
-                    {services.map((service) => {
+                    {activeServices.map((service) => {
 
-                        const cardClass = `${styles.card} ${!service.is_active ? styles.archived : ''}`;
-                        const statusClass = `${styles.statusBadge} ${service.is_active ? styles.statusActive : styles.statusArchived}`;
+                        const cardClass = styles.card;
+                        const statusClass = `${styles.statusBadge} ${styles.statusActive}`;
                         
                         return (
                             <div key={service.id} className={cardClass}>

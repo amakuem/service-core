@@ -22,10 +22,8 @@ const NotificationBell = () => {
     useEffect(() => {
         fetchNotifications();
 
-        // Опрос бэкенда каждые 3 секунды
         const interval = setInterval(fetchNotifications, 3000);
         
-        // Починили: добавили очистку интервала по переменной interval
         return () => clearInterval(interval);
     }, []);
 
@@ -77,14 +75,11 @@ const NotificationBell = () => {
                                     <div className={styles.itemHeader}>
                                         <span className={styles.title}>{notif.title}</span>
                                         
-                                        {/* 🆕 Обновленный блок для правильного расчета локального времени */}
                                         <span className={styles.time}>
                                             {(() => {
                                                 const dateStr = notif.created_at;
                                                 if (!dateStr) return "";
 
-                                                // Если бэк прислал «чистую» дату без таймзоны, 
-                                                // принудительно говорим JavaScript, что это UTC (добавляем 'Z')
                                                 const isUtc = dateStr.includes("Z") || dateStr.includes("+");
                                                 const safeDateStr = isUtc ? dateStr : `${dateStr}Z`;
 

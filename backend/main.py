@@ -125,7 +125,7 @@ def change_user_role(user_id: int, new_role: str, db: Session = Depends(get_db),
 
 @app.get("/services", response_model=List[schemas.ServiceResponse])
 def get_all_services(db: Session = Depends(get_db)):
-    services = db.query(models.Service).filter(models.Service.is_active == True).all()
+    services = db.query(models.Service).all()
     return services
 
 @app.get("/service/{service_id}", response_model=schemas.ServiceResponse)
