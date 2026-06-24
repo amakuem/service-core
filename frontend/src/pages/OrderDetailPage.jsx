@@ -19,6 +19,9 @@ const OrderDetailPage = () => {
 
     const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
 
+    const [masters, setMasters] = useState([]); 
+    const [isAssigningMaster, setIsAssigningMaster] = useState(false);
+
     useEffect(() => {
         const fetchOrderDetails = async () => {
             try {
@@ -31,11 +34,17 @@ const OrderDetailPage = () => {
 
                 const servicesResponse = await serviceApi.getAll();
                 setServices(servicesResponse.data);
+
+                if (userResponse.data.role === "admin") {
+                    const usersResponse = await userApi.getAll();
+                    const mastersList = usersResponse.data.filter(u => u.role === "master" || u.role === "admin");
+                    setMasters(mastersList);
+                }
             } catch (err) {
                 console.error(err);
                 setError(err.response?.data?.detail || "Не удалось загрузить информацию о заказе");
             } finally {
-                loading && setLoading(false);
+                setLoading(false);
             }
         };
 
@@ -76,6 +85,53 @@ const OrderDetailPage = () => {
         }
     };
 
+    const handleTakeOrder = async () => {
+        setIsAssigningMaster(true);
+        try {
+            const updateData = { 
+                master_id: currentUser.id,
+                status: order.status === "new" ? "diagnostics" : order.status
+            };
+            
+            await orderApi.update(id, updateData);
+            
+            setOrder(prev => ({ 
+                ...prev, 
+                master_id: currentUser.id,
+                master_name: currentUser.first_name,
+                master_last_name: currentUser.last_name,
+                status: updateData.status
+            }));
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.detail || "Не удалось взять заказ в работу");
+        } finally {
+            setIsAssigningMaster(false);
+        }
+    };
+
+    const handleAssignMaster = async (masterId) => {
+        setIsAssigningMaster(true);
+        try {
+            const parsedId = masterId ? parseInt(masterId) : null;
+            await orderApi.update(id, { master_id: parsedId });
+            
+            const selectedMaster = masters.find(m => m.id === parsedId);
+            
+            setOrder(prev => ({
+                ...prev,
+                master_id: parsedId,
+                master_name: selectedMaster ? selectedMaster.first_name : null,
+                master_last_name: selectedMaster ? selectedMaster.last_name : null
+            }));
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.detail || "Не удалось переназначить мастера");
+        } finally {
+            setIsAssigningMaster(false);
+        }
+    };
+
     const getStatusLabel = (status) => {
         switch (status) {
             case 'new': return 'Новый';
@@ -102,7 +158,6 @@ const OrderDetailPage = () => {
     if (error) return <div className={styles.errorContainer}>⚠️ {error} <br/><button onClick={() => navigate("/orders")} className={styles.backBtn}>Назад к списку</button></div>;
     if (!order) return <div className={styles.centered}>Заказ не найден</div>;
 
-    const isStaff = currentUser?.role === "master" || currentUser?.role === "admin";
     const isAdmin = currentUser?.role === "admin";
     const isAssignedMaster = currentUser?.role === "master" && order?.master_id === currentUser?.id;
     
@@ -172,12 +227,41 @@ const OrderDetailPage = () => {
                 <div className={styles.section}>
                     <h3>Ход выполнения и заметки мастера</h3>
                     <div className={styles.boxSecondary}>
-                        <p>
+                        
+                        <div className={styles.masterManagerRow} style={{ marginBottom: "15px" }}>
                             <strong>Мастер:</strong>{" "}
-                            {order.master_name || order.master_last_name
-                                ? `${order.master_name || ""} ${order.master_last_name || ""}`.trim()
-                                : "Назначается мастером..."}
-                        </p>
+                            {isAdmin ? (
+                                <select
+                                    value={order.master_id || ""}
+                                    onChange={(e) => handleAssignMaster(e.target.value)}
+                                    className={styles.masterSelect}
+                                    disabled={isAssigningMaster}
+                                >
+                                    <option value="">-- Не назначен (Выбрать мастера) --</option>
+                                    {masters.map(m => (
+                                        <option key={m.id} value={m.id}>
+                                            {`${m.first_name || ""} ${m.last_name || ""}`.trim()} ({m.email})
+                                        </option>
+                                    ))}
+                                </select>
+                            ) : (
+                                order.master_id ? (
+                                    <span>{`${order.master_name || ""} ${order.master_last_name || ""}`.trim()}</span>
+                                ) : (
+                                    <span style={{ color: "#e74c3c", fontWeight: "bold" }}>Назначается...</span>
+                                )
+                            )}
+
+                            {!isAdmin && currentUser?.role === "master" && !order.master_id && (
+                                <button
+                                    onClick={handleTakeOrder}
+                                    className={styles.takeOrderBtn}
+                                    disabled={isAssigningMaster}
+                                >
+                                    {isAssigningMaster ? "Оформление..." : "Взять заказ в работу 🛠️"}
+                                </button>
+                            )}
+                        </div>
                         
                         {order.estimated_ready_date && (
                             <p><strong>Планируемая дата готовности:</strong> {new Date(order.estimated_ready_date).toLocaleDateString('ru-RU')}</p>

@@ -309,3 +309,73 @@
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+
+.masterManagerRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.masterSelect {
+    padding: 8px 36px 8px 14px; 
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    color: var(--text-h, #08060d);
+    background-color: var(--bg, #fff);
+    border: 1px solid var(--border, #e5e4e7);
+    cursor: pointer;
+    outline: none;
+    
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%236b6375' stroke-width='2' viewBox='0 0 24 24'><path d='M19 9l-7 7-7-7'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+
+.masterSelect:hover:not(:disabled) {
+    border-color: var(--text, #6b6375);
+}
+
+.masterSelect:focus {
+    border-color: var(--accent, #aa3bff);
+    box-shadow: 0 0 0 2px rgba(170, 59, 255, 0.1);
+}
+
+.masterSelect:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.takeOrderBtn {
+    background-color: #10b981; 
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.takeOrderBtn:hover:not(:disabled) {
+    background-color: #059669; 
+}
+
+.takeOrderBtn:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.takeOrderBtn:disabled {
+    background-color: var(--border, #e5e4e7);
+    color: var(--text, #6b6375);
+    cursor: not-allowed;
+}

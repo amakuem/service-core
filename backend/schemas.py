@@ -92,6 +92,7 @@ class OrderCreate(OrderBase):
     services: list[OrderServiceCreate] = []
 
 class OrderUpdate(BaseModel):
+    master_id: Optional[int] = Field(None)
     status: Optional[str] = Field(None, max_length=30)
     master_comment: Optional[str] = Field(None)
     services: Optional[list[OrderServiceCreate]] = Field(None)
