@@ -90,13 +90,14 @@ const SignUpPage = () => {
     return (
         <div className={styles.container}>
             <form onSubmit={handleSubmit} className={styles.form}>
-                <h2 style={{ color: '#9ca3af', marginBottom: '20px' }}>Регистрация в CRM</h2>
+                <h2>Регистрация в CRM</h2>
                 
-                {error && <div className={styles.error} style={{ color: 'red', marginBottom: '15px' }}>{error}</div>}
+                {error && <div className={styles.error}>{error}</div>}
                 
                 <div className={styles.inputGroup}>
-                    <label>Имя:</label>
+                    <label htmlFor="first_name">Имя:</label>
                     <input 
+                        id="first_name"
                         type="text" 
                         name="first_name"
                         value={formData.first_name} 
@@ -106,8 +107,9 @@ const SignUpPage = () => {
                 </div>
 
                 <div className={styles.inputGroup}>
-                    <label>Фамилия:</label>
+                    <label htmlFor="last_name">Фамилия:</label>
                     <input 
+                        id="last_name"
                         type="text" 
                         name="last_name"
                         value={formData.last_name} 
@@ -117,11 +119,12 @@ const SignUpPage = () => {
                 </div>
 
                 <div className={styles.inputGroup}>
-                    <label>Телефон:</label>
+                    <label htmlFor="phone">Телефон:</label>
                     <input 
+                        id="phone"
                         type="tel" 
                         name="phone"
-                        placeholder="+375291112233"
+                        placeholder="+375 (29) 111-22-33 или 80 (29)..."
                         value={formData.phone} 
                         onChange={handleChange} 
                         required 
@@ -129,8 +132,9 @@ const SignUpPage = () => {
                 </div>
 
                 <div className={styles.inputGroup}>
-                    <label>Email:</label>
+                    <label htmlFor="email">Email:</label>
                     <input 
+                        id="email"
                         type="email" 
                         name="email"
                         value={formData.email} 
@@ -140,17 +144,19 @@ const SignUpPage = () => {
                 </div>
 
                 <div className={styles.inputGroup}>
-                    <label>Пароль:</label>
+                    <label htmlFor="password">Пароль:</label>
                     <input 
+                        id="password"
                         type="password" 
                         name="password"
                         value={formData.password} 
                         onChange={handleChange} 
+                        placeholder="Минимум 8 символов"
                         required 
                     />
                 </div>
 
-                <button type="submit" className={styles.button} style={{ marginTop: '10px' }}>
+                <button type="submit" className={styles.button}>
                     Создать аккаунт
                 </button>
             </form>
