@@ -14,6 +14,8 @@ app = FastAPI(title="Сервисный Центр API")
 app.include_router(auth.router)
 
 origins = [
+    "http://localhost",
+    "http://127.0.0.1",
     "http://localhost:3000",
     "http://localhost:5173",
     "http://127.0.0.1:3000",

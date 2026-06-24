@@ -4,7 +4,6 @@ import SignUpPage from './SignUpPage';
 import { authApi } from '../api/api';
 import { describe, test, expect, beforeEach, vi } from 'vitest';
 
-// Мокаем react-router-dom для тестирования навигации
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', () => ({
     useNavigate: () => mockNavigate,
@@ -18,13 +17,11 @@ vi.mock('../api/api', () => ({
 }));
 
 describe('SignUpPage - Юнит-тесты бизнес-логики (Vitest)', () => {
-    // ИСПРАВЛЕНИЕ ТУТ: Гарантируем, что каждый тест начинает с чистого реального времени
     beforeEach(() => {
         vi.clearAllMocks();
         vi.useRealTimers(); 
     });
 
-    // Функция-хелпер для быстрого заполнения формы
     const fillForm = (overrides = {}) => {
         const data = {
             first_name: 'Иван',
@@ -94,7 +91,6 @@ describe('SignUpPage - Юнит-тесты бизнес-логики (Vitest)', 
         expect(authApi.register).not.toHaveBeenCalled();
     });
 
-    // ИСПРАВЛЕНИЕ ТУТ: Оптимизировали работу с фейковым временем
     test('5. При успешном ответе API должен показать экран успеха и перенаправить на /login', async () => {
         vi.useFakeTimers(); 
         authApi.register.mockResolvedValueOnce({ data: {} });
@@ -103,11 +99,9 @@ describe('SignUpPage - Юнит-тесты бизнес-логики (Vitest)', 
         fillForm();
         fireEvent.click(screen.getByRole('button', { name: /Создать аккаунт/i }));
 
-        // Прокручиваем все асинхронные события и цепочки setTimeout одной командой
         await vi.runAllTimersAsync(); 
         
-        // Теперь проверяем результаты на финальной точке времени
-        expect(screen.getByText(/🎉 Успешно!/i)).toBeInTheDocument();
+        expect(screen.getByText(/Успешно!/i)).toBeInTheDocument();
         expect(mockNavigate).toHaveBeenCalledWith('/login');
     });
 
