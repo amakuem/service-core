@@ -25,9 +25,32 @@ const SignUpPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        if (formData.password.length < 8) {
+            setError('Пароль должен содержать минимум 8 символов');
+            return;
+        }
+
+        let cleanPhone = formData.phone.replace(/[^\d+]/g, '');
+
+        if (cleanPhone.startsWith('80') && cleanPhone.length === 11) {
+            cleanPhone = '+375' + cleanPhone.slice(2);
+        }
+
+        if (cleanPhone.startsWith('375') && cleanPhone.length === 12) {
+            cleanPhone = '+' + cleanPhone;
+        }
+        const phoneRegex = /^\+375(25|29|33|44|17)\d{7}$/;
+        if (!phoneRegex.test(cleanPhone)) {
+            setError('Неверный формат номера. Используйте +375 (XX) XXX-XX-XX или 80 (XX) XXX-XX-XX');
+            return;
+        }
+        const payload = {
+            ...formData,
+            phone: cleanPhone
+        };
 
         try {
-            await authApi.register(formData);
+            await authApi.register(payload);
             
             setSuccess(true);
 
